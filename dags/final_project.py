@@ -31,6 +31,7 @@ def final_project():
         s3_key='log-data/2018/11/',
         target_table='staging_events',
         copy_json_option='auto',
+        truncate=True  
     )
 
     stage_songs_to_redshift = StageToRedshiftOperator(
@@ -40,7 +41,8 @@ def final_project():
         s3_bucket='billybob-udacity-scott',
         s3_key='song-data/',
         target_table='staging_songs',
-        copy_json_option='auto'
+        copy_json_option='auto',
+        truncate=True 
     )
 
     load_songplays_table = LoadFactOperator(

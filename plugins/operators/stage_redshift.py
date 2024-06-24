@@ -16,6 +16,7 @@ class StageToRedshiftOperator(BaseOperator):
         s3_key: str,
         target_table: str,
         copy_json_option: str = 'auto',
+        truncate=False,  # New parameter for truncate option,
         **kwargs
     ) -> None:
         super().__init__(**kwargs)
@@ -25,14 +26,19 @@ class StageToRedshiftOperator(BaseOperator):
         self.s3_key = s3_key
         self.target_table = target_table
         self.copy_json_option = copy_json_option
+        self.truncate = truncate
 
     def execute(self, context):
         aws_hook = S3Hook(aws_conn_id=self.aws_credentials_id)
         credentials = aws_hook.get_credentials()
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
-        self.log.info("Clearing data from destination Redshift table")
-        redshift.run(f"DELETE FROM {self.target_table}")
+        if self.truncate:
+            self.log.info("Truncating data from destination Redshift table")
+            redshift.run(f"TRUNCATE TABLE {self.target_table}")
+        else:
+            self.log.info("Clearing data from destination Redshift table")
+            redshift.run(f"DELETE FROM {self.target_table}")
 
         self.log.info("Listing all JSON files in S3")
         s3_client = aws_hook.get_conn()
