@@ -1,5 +1,5 @@
 *.csv
-
+set_connections_and_variables.sh
 logs
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,python
