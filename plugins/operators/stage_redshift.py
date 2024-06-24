@@ -34,19 +34,32 @@ class StageToRedshiftOperator(BaseOperator):
         self.log.info("Clearing data from destination Redshift table")
         redshift.run(f"DELETE FROM {self.target_table}")
 
-        self.log.info("Copying data from S3 to Redshift")
-        rendered_key = self.s3_key.format(**context)  # Render templated field
-        s3_path = f"s3://{self.s3_bucket}/{rendered_key}"
-        copy_query = f"""
-            COPY {self.target_table}
-            FROM '{s3_path}'
-            ACCESS_KEY_ID '{credentials.access_key}'
-            SECRET_ACCESS_KEY '{credentials.secret_key}'
-            JSON '{self.copy_json_option}'
-            REGION 'us-east-1'; 
-        """
-        redshift.run(copy_query)
-        self.log.info(f"Data staged in Redshift table {self.target_table} from {s3_path}")
+        self.log.info("Listing S3 directories under the prefix")
+        s3_client = aws_hook.get_conn()
+        paginator = s3_client.get_paginator('list_objects_v2')
+        directories = set()
+        
+        for page in paginator.paginate(Bucket=self.s3_bucket, Prefix=self.s3_key, Delimiter='/'):
+            for prefix in page.get('CommonPrefixes', []):
+                directories.add(prefix['Prefix'])
+
+        if not directories:
+            self.log.warning(f"No directories found under s3://{self.s3_bucket}/{self.s3_key}")
+            return
+
+        for directory in directories:
+            self.log.info(f"Copying data from S3 to Redshift for directory {directory}")
+            s3_path = f"s3://{self.s3_bucket}/{directory}"
+            copy_query = f"""
+                COPY {self.target_table}
+                FROM '{s3_path}'
+                ACCESS_KEY_ID '{credentials.access_key}'
+                SECRET_ACCESS_KEY '{credentials.secret_key}'
+                JSON '{self.copy_json_option}'
+                REGION 'us-east-1';
+            """
+            redshift.run(copy_query)
+            self.log.info(f"Data staged in Redshift table {self.target_table} from {s3_path}")
 
 
 

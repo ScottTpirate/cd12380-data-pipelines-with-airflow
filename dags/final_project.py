@@ -28,7 +28,7 @@ def final_project():
         redshift_conn_id='redshift',
         aws_credentials_id='aws_credentials',
         s3_bucket='billybob-udacity-scott',
-        s3_key='log-data/{{ execution_date.strftime("%Y/%m/%d") }}',
+        s3_key='log-data/2018/11/',
         target_table='staging_events',
         copy_json_option='auto',
     )
