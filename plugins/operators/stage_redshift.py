@@ -34,22 +34,23 @@ class StageToRedshiftOperator(BaseOperator):
         self.log.info("Clearing data from destination Redshift table")
         redshift.run(f"DELETE FROM {self.target_table}")
 
-        self.log.info("Listing S3 directories under the prefix")
+        self.log.info("Listing all JSON files in S3")
         s3_client = aws_hook.get_conn()
         paginator = s3_client.get_paginator('list_objects_v2')
-        directories = set()
+        files = []
         
-        for page in paginator.paginate(Bucket=self.s3_bucket, Prefix=self.s3_key, Delimiter='/'):
-            for prefix in page.get('CommonPrefixes', []):
-                directories.add(prefix['Prefix'])
+        for page in paginator.paginate(Bucket=self.s3_bucket, Prefix=self.s3_key):
+            for obj in page.get('Contents', []):
+                if obj['Key'].endswith('.json'):
+                    files.append(obj['Key'])
 
-        if not directories:
-            self.log.warning(f"No directories found under s3://{self.s3_bucket}/{self.s3_key}")
+        if not files:
+            self.log.warning(f"No JSON files found under s3://{self.s3_bucket}/{self.s3_key}")
             return
 
-        for directory in directories:
-            self.log.info(f"Copying data from S3 to Redshift for directory {directory}")
-            s3_path = f"s3://{self.s3_bucket}/{directory}"
+        for file in files:
+            self.log.info(f"Copying data from S3 to Redshift for file {file}")
+            s3_path = f"s3://{self.s3_bucket}/{file}"
             copy_query = f"""
                 COPY {self.target_table}
                 FROM '{s3_path}'
