@@ -25,7 +25,7 @@ def final_project():
 
     stage_events_to_redshift = StageToRedshiftOperator(
         task_id='Stage_events',
-        redshift_conn_id='redshift_conn_id',
+        redshift_conn_id='redshift',
         aws_credentials_id='aws_credentials',
         s3_bucket='billybob-udacity-scott',
         s3_key='log-data/{{ execution_date.strftime("%Y/%m/%d") }}',
@@ -35,7 +35,7 @@ def final_project():
 
     stage_songs_to_redshift = StageToRedshiftOperator(
         task_id='Stage_songs',
-        redshift_conn_id='redshift_conn_id',
+        redshift_conn_id='redshift',
         aws_credentials_id='aws_credentials',
         s3_bucket='billybob-udacity-scott',
         s3_key='song-data/',
@@ -45,13 +45,13 @@ def final_project():
 
     load_songplays_table = LoadFactOperator(
         task_id='Load_songplays_fact_table',
-        redshift_conn_id='redshift_conn_id',
+        redshift_conn_id='redshift',
         sql_query=SqlQueries.songplay_table_insert
     )
 
     load_user_dimension_table = LoadDimensionOperator(
         task_id='Load_user_dim_table',
-        redshift_conn_id='redshift_conn_id',
+        redshift_conn_id='redshift',
         target_table='users',
         sql_query=SqlQueries.user_table_insert,
         insert_mode='truncate-insert'
@@ -59,7 +59,7 @@ def final_project():
 
     load_song_dimension_table = LoadDimensionOperator(
         task_id='Load_song_dim_table',
-        redshift_conn_id='redshift_conn_id',
+        redshift_conn_id='redshift',
         target_table='songs',
         sql_query=SqlQueries.song_table_insert,
         insert_mode='truncate-insert'
@@ -67,7 +67,7 @@ def final_project():
 
     load_artist_dimension_table = LoadDimensionOperator(
         task_id='Load_artist_dim_table',
-        redshift_conn_id='redshift_conn_id',
+        redshift_conn_id='redshift',
         target_table='artists',
         sql_query=SqlQueries.artist_table_insert,
         insert_mode='truncate-insert'
@@ -75,7 +75,7 @@ def final_project():
 
     load_time_dimension_table = LoadDimensionOperator(
         task_id='Load_time_dim_table',
-        redshift_conn_id='redshift_conn_id',
+        redshift_conn_id='redshift',
         target_table='time',
         sql_query=SqlQueries.time_table_insert,
         insert_mode='truncate-insert'
@@ -83,7 +83,7 @@ def final_project():
 
     run_quality_checks = DataQualityOperator(
         task_id='Run_data_quality_checks',
-        redshift_conn_id='redshift_conn_id',
+        redshift_conn_id='redshift',
         test_queries=['SELECT COUNT(*) FROM songplays WHERE userid IS NULL'],
         expected_results=[0]
     )
