@@ -43,7 +43,7 @@ class StageToRedshiftOperator(BaseOperator):
             ACCESS_KEY_ID '{credentials.access_key}'
             SECRET_ACCESS_KEY '{credentials.secret_key}'
             JSON '{self.copy_json_option}'
-            REGION 'us-west-2';  # Adjust the region as necessary
+            REGION 'us-east-1'; 
         """
         redshift.run(copy_query)
         self.log.info(f"Data staged in Redshift table {self.target_table} from {s3_path}")
