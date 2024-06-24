@@ -1,6 +1,7 @@
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
+from helpers import SqlQueries
 
 class LoadDimensionOperator(BaseOperator):
     ui_color = '#80BD9E'
@@ -9,14 +10,15 @@ class LoadDimensionOperator(BaseOperator):
     def __init__(self,
                  redshift_conn_id="redshift_default",
                  target_table=None,
-                 sql_query=None,
-                 insert_mode="truncate-insert",  # Default to truncate-insert mode
+                 sql_query=SqlQueries.user_table_insert,
+                 insert_mode='truncate-insert',
                  *args, **kwargs):
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
-        self.target_table = target_table
-        self.sql_query = sql_query
-        self.insert_mode = insert_mode
+        self.target_table = 'users'
+        self.sql_query=SqlQueries.user_table_insert
+        self.insert_mode='truncate-insert'
+        
 
     def execute(self, context):
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)

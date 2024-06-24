@@ -1,6 +1,7 @@
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
+from helpers import SqlQueries
 
 class LoadFactOperator(BaseOperator):
     ui_color = '#F98866'
@@ -12,7 +13,9 @@ class LoadFactOperator(BaseOperator):
                  *args, **kwargs):
         super(LoadFactOperator, self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
-        self.sql_query = sql_query
+        self.sql_query = SqlQueries.songplay_table_insert
+        
+
 
     def execute(self, context):
         if self.sql_query is None:

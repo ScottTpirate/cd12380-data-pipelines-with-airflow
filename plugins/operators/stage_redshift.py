@@ -8,16 +8,17 @@ class StageToRedshiftOperator(BaseOperator):
 
     template_fields = ("s3_key",)  # Enable templating for s3_key
 
-    @apply_defaults
-    def __init__(self,
-                 redshift_conn_id="redshift",
-                 aws_credentials_id="aws_credentials",
-                 s3_bucket=None,
-                 s3_key=None,
-                 target_table=None,
-                 copy_json_option='auto',  # default JSON option
-                 *args, **kwargs):
-        super(StageToRedshiftOperator, self).__init__(*args, **kwargs)
+    def __init__(
+        self,
+        redshift_conn_id: str,
+        aws_credentials_id: str,
+        s3_bucket: str,
+        s3_key: str,
+        target_table: str,
+        copy_json_option: str = 'auto',
+        **kwargs
+    ) -> None:
+        super().__init__(**kwargs)
         self.redshift_conn_id = redshift_conn_id
         self.aws_credentials_id = aws_credentials_id
         self.s3_bucket = s3_bucket
